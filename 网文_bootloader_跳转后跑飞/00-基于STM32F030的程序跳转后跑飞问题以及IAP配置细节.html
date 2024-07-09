@@ -1,0 +1,459 @@
+<!doctype html>
+<html lang="zh-CN">
+ <head> 
+  <meta charset="utf-8"> 
+  <link rel="canonical" href="https://blog.csdn.net/Entronk_star/article/details/108430911"> 
+  <meta http-equiv="content-type" content="text/html; charset=utf-8"> 
+  <meta name="renderer" content="webkit"> 
+  <meta name="force-rendering" content="webkit"> 
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"> 
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"> 
+  <meta name="report" content="{&quot;pid&quot;: &quot;blog&quot;, &quot;spm&quot;:&quot;1001.2101&quot;}">  
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+  <link rel="alternate" media="handheld" href="#"> 
+  <meta name="shenma-site-verification" content="5a59773ab8077d4a62bf469ab966a63b_1497598848"> 
+  <meta name="applicable-device" content="pc"> 
+  <link href="https://g.csdnimg.cn/static/logo/favicon32.ico" rel="shortcut icon" type="image/x-icon"> 
+  <title>基于STM32F030的程序跳转后跑飞问题以及IAP配置细节_能否通过stlink监控stm32f0 boot跳转app-CSDN博客</title>  
+  <meta name="keywords" content="能否通过stlink监控stm32f0 boot跳转app"> 
+  <meta name="csdn-baidu-search" content="{&quot;autorun&quot;:true,&quot;install&quot;:true,&quot;keyword&quot;:&quot;能否通过stlink监控stm32f0 boot跳转app&quot;}"> 
+  <meta name="description" content="文章浏览阅读2.8k次，点赞12次，收藏30次。程序跳转后跑飞 关键问题描述：（只想看IAP细节配置的可以往下拉，前面的问题分析跳过）IAP远程更新程序配置无误，且程序能程序跳转。但跳转后程序总是在固定的程序段跑飞重启设备。尝试过的办法：1、怀疑中断向量表重映射地址不对应，由于M0内核的特殊性，是把中断向量复制到RAM上，就各种方案尝试分配RAM区。结果如下图：RAM1必须是0x200000B4开头，因为stm32f030的中断向量表只有45个中断向量，每个向量地址是32位的即4个字节，45*4=0xB4，因此RAM必须留出0_能否通过stlink监控stm32f0 boot跳转app"> 
+  <link rel="stylesheet" type="text/css" href="https://csdnimg.cn/release/blogv2/dist/pc/css/detail_enter-5aeec9c560.min.css">  
+  <link rel="stylesheet" type="text/css" href="https://csdnimg.cn/release/blogv2/dist/pc/themesSkin/skin3-template/skin3-template-762f7595fd.min.css">   
+  <meta name="toolbar" content="{&quot;type&quot;:&quot;0&quot;,&quot;fixModel&quot;:&quot;1&quot;}">   
+  <link rel="stylesheet" type="text/css" href="https://csdnimg.cn/public/sandalstrap/1.4/css/sandalstrap.min.css"> 
+  <style>.MathJax_Display {text-align: center; margin: 1em 0em; position: relative; display: block!important; text-indent: 0; max-width: none; max-height: none; min-width: 0; min-height: 0; width: 100%} .MathJax .merror {background-color: #FFFF88; color: #CC0000; border: 1px solid #CC0000; padding: 1px 3px; font-style: normal; font-size: 90%} .MathJax .MJX-monospace {font-family: monospace} .MathJax .MJX-sans-serif {font-family: sans-serif} #MathJax_Tooltip {background-color: InfoBackground; color: InfoText; border: 1px solid black; box-shadow: 2px 2px 5px #AAAAAA; -webkit-box-shadow: 2px 2px 5px #AAAAAA; -moz-box-shadow: 2px 2px 5px #AAAAAA; -khtml-box-shadow: 2px 2px 5px #AAAAAA; filter: progid:DXImageTransform.Microsoft.dropshadow(OffX=2, OffY=2, Color='gray', Positive='true'); padding: 3px 4px; z-index: 401; position: absolute; left: 0; top: 0; width: auto; height: auto; display: none} .MathJax {display: inline; font-style: normal; font-weight: normal; line-height: normal; font-size: 100%; font-size-adjust: none; text-indent: 0; text-align: left; text-transform: none; letter-spacing: normal; word-spacing: normal; word-wrap: normal; white-space: nowrap; float: none; direction: ltr; max-width: none; max-height: none; min-width: 0; min-height: 0; border: 0; padding: 0; margin: 0} .MathJax:focus, body :focus .MathJax {display: inline-table} .MathJax.MathJax_FullWidth {text-align: center; display: table-cell!important; width: 10000em!important} .MathJax img, .MathJax nobr, .MathJax a {border: 0; padding: 0; margin: 0; max-width: none; max-height: none; min-width: 0; min-height: 0; vertical-align: 0; line-height: normal; text-decoration: none} img.MathJax_strut {border: 0!important; padding: 0!important; margin: 0!important; vertical-align: 0!important} .MathJax span {display: inline; position: static; border: 0; padding: 0; margin: 0; vertical-align: 0; line-height: normal; text-decoration: none} .MathJax nobr {white-space: nowrap!important} .MathJax img {display: inline!important; float: none!important} .MathJax * {transition: none; -webkit-transition: none; -moz-transition: none; -ms-transition: none; -o-transition: none} .MathJax_Processing {visibility: hidden; position: fixed; width: 0; height: 0; overflow: hidden} .MathJax_Processed {display: none!important} .MathJax_ExBox {display: block!important; overflow: hidden; width: 1px; height: 60ex; min-height: 0; max-height: none} .MathJax .MathJax_EmBox {display: block!important; overflow: hidden; width: 1px; height: 60em; min-height: 0; max-height: none} .MathJax_LineBox {display: table!important} .MathJax_LineBox span {display: table-cell!important; width: 10000em!important; min-width: 0; max-width: none; padding: 0; border: 0; margin: 0} .MathJax .MathJax_HitBox {cursor: text; background: white; opacity: 0; filter: alpha(opacity=0)} .MathJax .MathJax_HitBox * {filter: none; opacity: 1; background: transparent} #MathJax_Tooltip * {filter: none; opacity: 1; background: transparent} @font-face {font-family: MathJax_Main; src: url('https://csdnimg.cn/release/blog_mathjax/fonts/HTML-CSS/TeX/woff/MathJax_Main-Regular.woff?V=2.7.2') format('woff'), url('https://csdnimg.cn/release/blog_mathjax/fonts/HTML-CSS/TeX/otf/MathJax_Main-Regular.otf?V=2.7.2') format('opentype')} @font-face {font-family: MathJax_Main-bold; src: url('https://csdnimg.cn/release/blog_mathjax/fonts/HTML-CSS/TeX/woff/MathJax_Main-Bold.woff?V=2.7.2') format('woff'), url('https://csdnimg.cn/release/blog_mathjax/fonts/HTML-CSS/TeX/otf/MathJax_Main-Bold.otf?V=2.7.2') format('opentype')} @font-face {font-family: MathJax_Main-italic; src: url('https://csdnimg.cn/release/blog_mathjax/fonts/HTML-CSS/TeX/woff/MathJax_Main-Italic.woff?V=2.7.2') format('woff'), url('https://csdnimg.cn/release/blog_mathjax/fonts/HTML-CSS/TeX/otf/MathJax_Main-Italic.otf?V=2.7.2') format('opentype')} @font-face {font-family: MathJax_Math-italic; src: url('https://csdnimg.cn/release/blog_mathjax/fonts/HTML-CSS/TeX/woff/MathJax_Math-Italic.woff?V=2.7.2') format('woff'), url('https://csdnimg.cn/release/blog_mathjax/fonts/HTML-CSS/TeX/otf/MathJax_Math-Italic.otf?V=2.7.2') format('opentype')} @font-face {font-family: MathJax_Caligraphic; src: url('https://csdnimg.cn/release/blog_mathjax/fonts/HTML-CSS/TeX/woff/MathJax_Caligraphic-Regular.woff?V=2.7.2') format('woff'), url('https://csdnimg.cn/release/blog_mathjax/fonts/HTML-CSS/TeX/otf/MathJax_Caligraphic-Regular.otf?V=2.7.2') format('opentype')} @font-face {font-family: MathJax_Size1; src: url('https://csdnimg.cn/release/blog_mathjax/fonts/HTML-CSS/TeX/woff/MathJax_Size1-Regular.woff?V=2.7.2') format('woff'), url('https://csdnimg.cn/release/blog_mathjax/fonts/HTML-CSS/TeX/otf/MathJax_Size1-Regular.otf?V=2.7.2') format('opentype')} @font-face {font-family: MathJax_Size2; src: url('https://csdnimg.cn/release/blog_mathjax/fonts/HTML-CSS/TeX/woff/MathJax_Size2-Regular.woff?V=2.7.2') format('woff'), url('https://csdnimg.cn/release/blog_mathjax/fonts/HTML-CSS/TeX/otf/MathJax_Size2-Regular.otf?V=2.7.2') format('opentype')} @font-face {font-family: MathJax_Size3; src: url('https://csdnimg.cn/release/blog_mathjax/fonts/HTML-CSS/TeX/woff/MathJax_Size3-Regular.woff?V=2.7.2') format('woff'), url('https://csdnimg.cn/release/blog_mathjax/fonts/HTML-CSS/TeX/otf/MathJax_Size3-Regular.otf?V=2.7.2') format('opentype')} @font-face {font-family: MathJax_Size4; src: url('https://csdnimg.cn/release/blog_mathjax/fonts/HTML-CSS/TeX/woff/MathJax_Size4-Regular.woff?V=2.7.2') format('woff'), url('https://csdnimg.cn/release/blog_mathjax/fonts/HTML-CSS/TeX/otf/MathJax_Size4-Regular.otf?V=2.7.2') format('opentype')} .MathJax .noError {vertical-align: ; font-size: 90%; text-align: left; color: black; padding: 1px 3px; border: 1px solid}</style>    
+ </head> 
+ <body class="nodata " style=""> 
+  <div id="toolbarBox" style="min-height: 48px;"></div>    
+  <link rel="stylesheet" href="https://csdnimg.cn/release/blogv2/dist/pc/css/blog_code-01256533b5.min.css"> 
+  <link rel="stylesheet" href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/chart-3456820cac.css"> 
+  <link rel="stylesheet" href="https://g.csdnimg.cn/lib/swiper/6.0.4/css/swiper.css">   
+  <div class="main_father clearfix  justify-content-center mainfather-concision" style="height:100%;"> 
+   <div class="container clearfix container-concision" id="mainBox" style="width:100%">  
+    <main style="width:100%">  
+     <div class="blog-content-box"> 
+      <div class="article-header-box"> 
+       <div class="article-header"> 
+        <div class="article-title-box"> 
+         <h1 class="title-article" id="articleContentId">基于STM32F030的程序跳转后跑飞问题以及IAP配置细节</h1> 
+        </div> 
+        <div class="article-info-box"> 
+         <div class="article-bar-top"> 
+          <img class="article-type-img" src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fcsdnimg.cn%2Frelease%2Fblogv2%2Fdist%2Fpc%2Fimg%2Foriginal.png&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2FEntronk_star%2Farticle%2Fdetails%2F108430911" alt=""> 
+          <div class="bar-content"> 
+           <img class="article-vip-img article-heard-img" src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fcsdnimg.cn%2Frelease%2Fblogv2%2Fdist%2Fpc%2Fimg%2FidentityVip.png&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2FEntronk_star%2Farticle%2Fdetails%2F108430911" alt=""> 
+           <span class="article-vip-text vip_article"> VIP文章</span> 
+           <a class="follow-nickName " href="https://blog.csdn.net/Entronk_star" target="_blank" rel="noopener" title="Entronk_star">Entronk_star</a> 
+           <img class="article-time-img article-heard-img" src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fcsdnimg.cn%2Frelease%2Fblogv2%2Fdist%2Fpc%2Fimg%2FnewUpTime2.png&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2FEntronk_star%2Farticle%2Fdetails%2F108430911" alt=""> 
+           <span class="time">已于&nbsp;2022-04-13 16:15:12&nbsp;修改</span> 
+           <div class="read-count-box"> 
+            <img class="article-read-img article-heard-img" src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fcsdnimg.cn%2Frelease%2Fblogv2%2Fdist%2Fpc%2Fimg%2FarticleReadEyes2.png&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2FEntronk_star%2Farticle%2Fdetails%2F108430911" alt=""> 
+            <span class="read-count">阅读量2.8k</span> 
+            <a id="blog_detail_zk_collection" class="un-collection" data-report-click="{&quot;mod&quot;:&quot;popu_823&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4232&quot;,&quot;ab&quot;:&quot;new&quot;}"> <img class="article-collect-img article-heard-img un-collect-status isdefault" style="display:inline-block" src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fcsdnimg.cn%2Frelease%2Fblogv2%2Fdist%2Fpc%2Fimg%2FtobarCollect2.png&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2FEntronk_star%2Farticle%2Fdetails%2F108430911" alt=""> <img class="article-collect-img article-heard-img collect-status isactive" style="display:none" src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fcsdnimg.cn%2Frelease%2Fblogv2%2Fdist%2Fpc%2Fimg%2FtobarCollectionActive2.png&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2FEntronk_star%2Farticle%2Fdetails%2F108430911" alt=""> <span class="name">收藏</span> <span class="get-collection"> 30 </span> </a> 
+            <div class="read-count-box is-like"> 
+             <img class="article-read-img article-heard-img" style="display:none" id="is-like-imgactive-new" src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fcsdnimg.cn%2Frelease%2Fblogv2%2Fdist%2Fpc%2Fimg%2FnewHeart2023Active.png&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2FEntronk_star%2Farticle%2Fdetails%2F108430911" alt=""> 
+             <img class="article-read-img article-heard-img" style="display:block" id="is-like-img-new" src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fcsdnimg.cn%2Frelease%2Fblogv2%2Fdist%2Fpc%2Fimg%2FnewHeart2023Black.png&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2FEntronk_star%2Farticle%2Fdetails%2F108430911" alt=""> 
+             <span class="read-count" id="blog-digg-num">点赞数 12 </span> 
+            </div> 
+           </div> 
+          </div> 
+         </div> 
+         <div class="blog-tags-box"> 
+          <div class="tags-box artic-tag-box"> 
+           <span class="label">分类专栏：</span> 
+           <a class="tag-link" href="https://blog.csdn.net/entronk_star/category_8977978.html" target="_blank" rel="noopener">单片机学习</a> 
+           <span class="label">文章标签：</span> 
+           <a rel="noopener" data-report-click="{&quot;mod&quot;:&quot;popu_626&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4223&quot;,&quot;strategy&quot;:&quot;单片机&quot;,&quot;ab&quot;:&quot;new&quot;,&quot;extra&quot;:&quot;{\&quot;searchword\&quot;:\&quot;单片机\&quot;}&quot;}" class="tag-link" href="https://so.csdn.net/so/search/s.do?q=%E5%8D%95%E7%89%87%E6%9C%BA&amp;t=all&amp;o=vip&amp;s=&amp;l=&amp;f=&amp;viparticle=" target="_blank">单片机</a> 
+           <a rel="noopener" data-report-click="{&quot;mod&quot;:&quot;popu_626&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4223&quot;,&quot;strategy&quot;:&quot;IAP&quot;,&quot;ab&quot;:&quot;new&quot;,&quot;extra&quot;:&quot;{\&quot;searchword\&quot;:\&quot;IAP\&quot;}&quot;}" class="tag-link" href="https://so.csdn.net/so/search/s.do?q=IAP&amp;t=all&amp;o=vip&amp;s=&amp;l=&amp;f=&amp;viparticle=" target="_blank">IAP</a> 
+          </div> 
+         </div> 
+         <div class="up-time">
+          <span>于&nbsp;2020-09-06 15:01:54&nbsp;首次发布</span>
+         </div> 
+         <div class="slide-content-box"> 
+          <div class="article-copyright"> 
+           <div class="creativecommons">
+             版权声明：本文为博主原创文章，遵循
+            <a href="http://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener"> CC 4.0 BY-SA </a>版权协议，转载请附上原文出处链接和本声明。 
+           </div> 
+           <div class="article-source-link">
+             本文链接：
+            <a href="https://blog.csdn.net/Entronk_star/article/details/108430911" target="_blank">https://blog.csdn.net/Entronk_star/article/details/108430911</a> 
+           </div> 
+          </div> 
+         </div> 
+         <div class="operating"> 
+          <a class="href-article-edit slide-toggle">版权</a> 
+         </div> 
+        </div> 
+       </div> 
+      </div> 
+      <div id="blogHuaweiyunAdvert"></div> 
+      <article class="baidu_pl"> 
+       <div id="article_content" class="article_content clearfix"> 
+        <link rel="stylesheet" href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/kdoc_html_views-1a98987dfd.css"> 
+        <link rel="stylesheet" href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/ck_htmledit_views-044f2cf1dc.css"> 
+        <div id="content_views" class="htmledit_views"> 
+         <h4>程序跳转后跑飞 关键问题描述：</h4> 
+         <p>（只想看IAP细节配置的可以往下拉，前面的问题分析跳过）</p> 
+         <p>IAP远程更新程序配置无误，且程序能程序跳转。但跳转后程序总是在固定的程序段跑飞重启设备。</p> 
+         <p>尝试过的办法：</p> 
+         <p>1、怀疑中断向量表重映射地址不对应，由于M0内核的特殊性，是把中断向量复制到RAM上，就各种方案尝试分配RAM区。</p> 
+         <p>结果如下图：</p> 
+         <p><img alt="" height="584" src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fimg-blog.csdnimg.cn%2F20200906140812737.png%3Fx-oss-process%3Dimage%2Fwatermark%2Ctype_ZmFuZ3poZW5naGVpdGk%2Cshadow_10%2Ctext_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L0VudHJvbmtfc3Rhcg%3D%3D%2Csize_16%2Ccolor_FFFFFF%2Ct_70&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2FEntronk_star%2Farticle%2Fdetails%2F108430911" width="788"></p> 
+         <p>RAM1必须是0x200000B4开头，因为stm32f030的中断向量表只有45个中断向量，每个向量地址是32位的即4个字节，45*4=0xB4，因此RAM必须留出0XB4空间存储中断向量，且RAM空间必须连续，因此RAM1要从0x20000000+B4开始。</p> 
+         <p>如果不按照上面这个做，某些中断会发送错误（以我的工程是发生了各种奇怪的错误，只有像上面这样的配置才不会中断错误）</p> 
+         <p>2、怀疑是程序烧录过程的问题。因为我是boot工程和APP工程都是在KEIL5上直接编译然后用ST-LINK V2一个个烧录的。后面我把boot程序的main函数只留一行代码，就是进入main就直接跳转程序到app，结果app正常运行，不会跑飞。</p> 
+         <p><strong>证明：多个工程文件只要地址不重叠可以编译后通过ST-LINK V2一个一个烧录到单片机</strong></p> 
+         <p><strong>这也说明了程序跳转后会跑飞，问题出在boot工程的配置上或者是打开的外设上</strong></p> 
+         <p>3、首先认为是程序跳转前中断关闭未成功。在这个问题上，我踩过下面这个坑，是别的博主写的，可以参考参考：</p> 
+         <p><img alt="" height="270" src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fimg-blog.csdnimg.cn%2F20200906142110135.png%3Fx-oss-process%3Dimage%2Fwatermark%2Ctype_ZmFuZ3poZW5naGVpdGk%2Cshadow_10%2Ctext_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L0VudHJvbmtfc3Rhcg%3D%3D%2Csize_16%2Ccolor_FFFFFF%2Ct_70&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2FEntronk_star%2Farticle%2Fdetails%2F108430911" width="883"></p> 
+         <p>我一开始是调用HAL库上的这个函数：</p> 
+         <p>void HAL_NVIC_DisableIRQ(IRQn_Type IRQn)<br> {
+          <!-- --><br> &nbsp; /* Check the parameters */<br> &nbsp; assert_param(IS_NVIC_DEVICE_IRQ(IRQn));<br> &nbsp;&nbsp;<br> &nbsp; /* Disable interrupt */<br> &nbsp; NVIC_DisableIRQ(IRQn);<br> }一个个关闭中断，结果一样未解决问题。</p> 
+         <p>后面看见有博主说<strong>为了以防万一要关闭所有曾经打开的外设</strong>，我就如下关闭了所有曾经使能的外设，包括GPIO：</p> 
+         <p>&nbsp;&nbsp; &nbsp;IWDG_WINDOW_DISABLE;<br> &nbsp;&nbsp; &nbsp;__HAL_RCC_GPIOF_CLK_DISABLE();<br> &nbsp; __HAL_RCC_GPIOA_CLK_DISABLE();<br> &nbsp; __HAL_RCC_GPIOB_CLK_DISABLE();<br> &nbsp;&nbsp; &nbsp;__HAL_RCC_TIM3_CLK_DISABLE();<br> &nbsp;&nbsp; &nbsp;__HAL_RCC_USART3_CLK_DISABLE();<br> &nbsp;&nbsp; &nbsp;__HAL_RCC_USART2_CLK_DISABLE();<br> &nbsp;&nbsp; &nbsp;__HAL_RCC_USART1_CLK_DISABLE();<br> &nbsp;&nbsp; &nbsp;__HAL_RCC_USART4_CLK_DISABLE();问题一样没有解决，现象也是没变化。</p> 
+         <p>4、回到了问题的关键又<strong>诡异的现象——程序总是在固定的程序段跑飞</strong>。</p> 
+         <p>再加上之前分析的，问题出现在boot工程上，那就很可能是boot工程配置有问题，尤其是在内存地址分配上。因为把boot工程的main程序删减就没问题所以我猜想假设是boot工程上的一些程序地址和APP上重复了，所以APP一运行到这个程序就卡住跑飞，但又因为查看程序地址ROM分配是没重叠的，那所以重叠的部分是不是在RAM分配上？因为程序运行不仅仅需要ROM寻址找到需要运行的程序地址，还需要RAM支持程序运行工程中产生、处理数据。APP工程的RAM分配不能变只能像上面第1点描述的那样。boot工程RAM原来是如下图这样分配的（直接把所有RAM都用上，因为当时觉得程序跳转后，RAM可以自动初始化）</p> 
+         <p><img alt="" height="584" src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fimg-blog.csdnimg.cn%2F20200906143710671.png%3Fx-oss-process%3Dimage%2Fwatermark%2Ctype_ZmFuZ3poZW5naGVpdGk%2Cshadow_10%2Ctext_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L0VudHJvbmtfc3Rhcg%3D%3D%2Csize_16%2Ccolor_FFFFFF%2Ct_70&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2FEntronk_star%2Farticle%2Fdetails%2F108430911" width="788"></p> 
+         <p>后来我把boot工程的RAM分配修改成这样：</p> 
+         <p><img alt="" height="584" src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fimg-blog.csdnimg.cn%2F20200906143823264.png%3Fx-oss-process%3Dimage%2Fwatermark%2Ctype_ZmFuZ3poZW5naGVpdGk%2Cshadow_10%2Ctext_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L0VudHJvbmtfc3Rhcg%3D%3D%2Csize_16%2Ccolor_FFFFFF%2Ct_70&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2FEntronk_star%2Farticle%2Fdetails%2F108430911" width="788"></p> 
+         <p>我特意把RAM1这个从0x2000000B8开始比0x2000000B4大一个字的空间，就是避免boot工程的RAM空间APP工程的中断向量复制后所在的RAM地址（0x200000000—0x2000000B4）有一丁点重叠。ROM空间也是，避免了与APP工程的有一丁点重叠。</p> 
+         <p>我不知道问题本质是不是这个原因（<strong>抛砖引玉，望各位大佬评论区指教</strong>），但是我做到这里，所描述的问题立马解决了。</p> 
+         <h4><strong>基于STM32F0的IAP远程更新配置细节</strong></h4> 
+         <p>1、去ST官网参考ST官方文档：Jumping_topic_about_different_procedure_code_zone_based_on_STM32F0.pdf</p> 
+         <p>2、STM32F0的IAP远程更新配置步骤相同，但是具体配置会根据不同具体单片机型号有差异，比如中断向量的重映射，我的单片机是stm32f030，中断向量__Vectors 除了栈顶就45个，而官方文档举例的时候是有48个，就是下面这段绿色的代码，在我的情况下需要把48改成45：</p> 
+         <p><img alt="" height="245" src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fimg-blog.csdnimg.cn%2F20200906145121202.png%3Fx-oss-process%3Dimage%2Fwatermark%2Ctype_ZmFuZ3poZW5naGVpdGk%2Cshadow_10%2Ctext_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L0VudHJvbmtfc3Rhcg%3D%3D%2Csize_16%2Ccolor_FFFFFF%2Ct_70&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2FEntronk_star%2Farticle%2Fdetails%2F108430911" width="727"></p> 
+         <p>还有其他的差异需要自己去挖掘。挖掘办法就是用文档等资料描述的内容在stm32底层固件上找到验证，就上面所说的中断向量重映射的不同型号单片机的差异我就是在stm32f030启动文件上发现的<img alt="" height="28" src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fimg-blog.csdnimg.cn%2F2020090614541377.png&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2FEntronk_star%2Farticle%2Fdetails%2F108430911" width="177"></p> 
+         <p>3、程序跳转前，必须关闭所有中断，不能贪图方便直接关总中断然后在APP程序再打开总中断，必须一个个去关闭，即使总中断开着也是无所谓的，至于为什么，我上面的问题分析里已经给了参考。如果关闭中断后发现还是出现问题或者说是没关闭成功，<strong>如果你对这个关闭中断的库函数底层不熟悉建议操作寄存器关闭中断，且关闭中断前再把中断标志位清除</strong>。因为程序跳转后不会把中断以及其他外设寄存器状态位重置，只有单片机复位才会重置。</p> 
+         <p>最后，真的真的太不容易了，本来以为可以在CSDN里站在巨人的肩膀上，但这个问题的解决方案，我也是两天两夜没找到对我有用，都是自己自己一步一步去分析，烧录了几十上百次代码尝试的结果，如果大家觉得我的解决方案有用，有能力的可以支持一下，觉得我的一般般或者不好也欢迎大佬评论区指教，活到老学到老！</p> 
+         <p></p> 
+        </div> 
+       </div> 
+       <div id="treeSkill"></div> 
+      </article>  
+     </div> 
+     <div class="directory-boxshadow-dialog" style="display:none;"> 
+      <div class="directory-boxshadow-dialog-box"> 
+      </div> 
+      <div class="vip-limited-time-offer-box"> 
+       <div class="vip-limited-time-offer-content"> 
+        <img class="limited-img" src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fcsdnimg.cn%2Frelease%2Fblogv2%2Fdist%2Fpc%2Fimg%2Fvip-limited-close.png&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2FEntronk_star%2Farticle%2Fdetails%2F108430911"> 
+        <div class="limited-box"> 
+         <span class="limited-num"></span> 
+         <span class="limited-quan"> 优惠劵</span> 
+        </div> 
+        <div class="limited-time-box"> 
+         <span class="time-hour"></span> 
+         <span class="time-minite"></span> 
+         <span class="time-second"></span> 
+        </div> 
+        <a class="limited-time-btn" href="https://mall.csdn.net/vip" data-report-click="{&quot;spm&quot;:&quot;1001.2101.3001.9621&quot;}" data-report-query="spm=1001.2101.3001.9621"></a> 
+       </div> 
+      </div> 
+     </div>     
+     <a id="commentBox" name="commentBox"></a>      
+     <div id="recommendNps" class="recommend-nps-box common-nps-box"> 
+      <h3 class="aside-title">“相关推荐”对你有帮助么？</h3> 
+      <div class="aside-content"> 
+       <ul class="newnps-list"> 
+        <li class="newnps-item" data-type="非常没帮助"> 
+         <div class="newnps-img-box"> 
+          <img class="newnps-img active" src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fcsdnimg.cn%2Frelease%2Fblogv2%2Fdist%2Fpc%2Fimg%2FnpsFeel1.png&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2FEntronk_star%2Farticle%2Fdetails%2F108430911" alt=""> 
+          <img class="newnps-img default" src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fcsdnimg.cn%2Frelease%2Fblogv2%2Fdist%2Fpc%2Fimg%2FnpsFeelGrey1.png&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2FEntronk_star%2Farticle%2Fdetails%2F108430911" alt=""> 
+         </div> 
+         <div class="newnps-text">
+          非常没帮助
+         </div> </li> 
+        <li class="newnps-item" data-type="没帮助"> 
+         <div class="newnps-img-box"> 
+          <img class="newnps-img active" src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fcsdnimg.cn%2Frelease%2Fblogv2%2Fdist%2Fpc%2Fimg%2FnpsFeel2.png&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2FEntronk_star%2Farticle%2Fdetails%2F108430911" alt=""> 
+          <img class="newnps-img default" src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fcsdnimg.cn%2Frelease%2Fblogv2%2Fdist%2Fpc%2Fimg%2FnpsFeelGrey2.png&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2FEntronk_star%2Farticle%2Fdetails%2F108430911" alt=""> 
+         </div> 
+         <div class="newnps-text">
+          没帮助
+         </div> </li> 
+        <li class="newnps-item" data-type="一般"> 
+         <div class="newnps-img-box"> 
+          <img class="newnps-img active" src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fcsdnimg.cn%2Frelease%2Fblogv2%2Fdist%2Fpc%2Fimg%2FnpsFeel3.png&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2FEntronk_star%2Farticle%2Fdetails%2F108430911" alt=""> 
+          <img class="newnps-img default" src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fcsdnimg.cn%2Frelease%2Fblogv2%2Fdist%2Fpc%2Fimg%2FnpsFeelGrey3.png&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2FEntronk_star%2Farticle%2Fdetails%2F108430911" alt=""> 
+         </div> 
+         <div class="newnps-text">
+          一般
+         </div> </li> 
+        <li class="newnps-item" data-type="有帮助"> 
+         <div class="newnps-img-box"> 
+          <img class="newnps-img active" src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fcsdnimg.cn%2Frelease%2Fblogv2%2Fdist%2Fpc%2Fimg%2FnpsFeel4.png&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2FEntronk_star%2Farticle%2Fdetails%2F108430911" alt=""> 
+          <img class="newnps-img default" src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fcsdnimg.cn%2Frelease%2Fblogv2%2Fdist%2Fpc%2Fimg%2FnpsFeelGrey4.png&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2FEntronk_star%2Farticle%2Fdetails%2F108430911" alt=""> 
+         </div> 
+         <div class="newnps-text">
+          有帮助
+         </div> </li> 
+        <li class="newnps-item" data-type="非常有帮助"> 
+         <div class="newnps-img-box"> 
+          <img class="newnps-img active" src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fcsdnimg.cn%2Frelease%2Fblogv2%2Fdist%2Fpc%2Fimg%2FnpsFeel5.png&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2FEntronk_star%2Farticle%2Fdetails%2F108430911" alt=""> 
+          <img class="newnps-img default" src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fcsdnimg.cn%2Frelease%2Fblogv2%2Fdist%2Fpc%2Fimg%2FnpsFeelGrey5.png&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2FEntronk_star%2Farticle%2Fdetails%2F108430911" alt=""> 
+         </div> 
+         <div class="newnps-text">
+          非常有帮助
+         </div> </li> 
+       </ul> 
+       <div class="newnps-form-box"> 
+        <div class="newnps-form"> 
+         <input type="text" placeholder="请输入建议或反馈后点击提交" class="newnps-input"> 
+         <span class="newnps-btn">提交</span> 
+        </div> 
+       </div> 
+      </div> 
+     </div>   
+    </main>     
+   </div> 
+   <div class="recommend-right align-items-stretch clearfix" id="rightAside" data-type="recommend"> 
+    <aside class="recommend-right_aside"> 
+     <div id="recommend-right"> 
+      <div class="flex-column aside-box groupfile" id="groupfile"> 
+       <div class="groupfile-div"> 
+        <h3 class="aside-title">目录</h3> 
+        <div class="align-items-stretch group_item"> 
+         <div class="pos-box"> 
+          <div class="scroll-box"> 
+           <div class="toc-box"></div> 
+          </div> 
+         </div> 
+        </div> 
+       </div> 
+      </div> 
+      <div class="aside-box kind_person d-flex flex-column"> 
+       <h3 class="aside-title">分类专栏</h3> 
+       <div class="align-items-stretch kindof_item" id="kind_person_column"> 
+        <div class="aside-content"> 
+         <ul> 
+          <li> <a class="clearfix special-column-name" href="https://blog.csdn.net/entronk_star/category_10509804.html" data-report-click="{&quot;mod&quot;:&quot;popu_537&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4137&quot;,&quot;strategy&quot;:&quot;pc付费专栏左侧入口&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/entronk_star/category_10509804.html&quot;,&quot;ab&quot;:&quot;new&quot;}"> 
+            <div class="special-column-bar "></div> <img src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fimg-blog.csdnimg.cn%2F20201014180756925.png%3Fx-oss-process%3Dimage%2Fresize%2Cm_fixed%2Ch_64%2Cw_64&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2FEntronk_star%2Farticle%2Fdetails%2F108430911" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'"> <span class=""> 问题偶遇 </span> </a> <span class="special-column-num">1篇</span> </li> 
+          <li> <a class="clearfix special-column-name" href="https://blog.csdn.net/entronk_star/category_10295250.html" data-report-click="{&quot;mod&quot;:&quot;popu_537&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4137&quot;,&quot;strategy&quot;:&quot;pc付费专栏左侧入口&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/entronk_star/category_10295250.html&quot;,&quot;ab&quot;:&quot;new&quot;}"> 
+            <div class="special-column-bar "></div> <img src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fimg-blog.csdnimg.cn%2F20201014180756926.png%3Fx-oss-process%3Dimage%2Fresize%2Cm_fixed%2Ch_64%2Cw_64&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2FEntronk_star%2Farticle%2Fdetails%2F108430911" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'"> <span class=""> 处理器架构 </span> </a> <span class="special-column-num">1篇</span> </li> 
+          <li> <a class="clearfix special-column-name" href="https://blog.csdn.net/entronk_star/category_9683396.html" data-report-click="{&quot;mod&quot;:&quot;popu_537&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4137&quot;,&quot;strategy&quot;:&quot;pc付费专栏左侧入口&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/entronk_star/category_9683396.html&quot;,&quot;ab&quot;:&quot;new&quot;}"> 
+            <div class="special-column-bar "></div> <img src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fimg-blog.csdnimg.cn%2F20201014180756757.png%3Fx-oss-process%3Dimage%2Fresize%2Cm_fixed%2Ch_64%2Cw_64&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2FEntronk_star%2Farticle%2Fdetails%2F108430911" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'"> <span class=""> C++ </span> </a> <span class="special-column-num">1篇</span> </li> 
+          <li> <a class="clearfix special-column-name" href="https://blog.csdn.net/entronk_star/category_9669404.html" data-report-click="{&quot;mod&quot;:&quot;popu_537&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4137&quot;,&quot;strategy&quot;:&quot;pc付费专栏左侧入口&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/entronk_star/category_9669404.html&quot;,&quot;ab&quot;:&quot;new&quot;}"> 
+            <div class="special-column-bar "></div> <img src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fimg-blog.csdnimg.cn%2F20201014180756925.png%3Fx-oss-process%3Dimage%2Fresize%2Cm_fixed%2Ch_64%2Cw_64&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2FEntronk_star%2Farticle%2Fdetails%2F108430911" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'"> <span class=""> FreeRTOS </span> </a> <span class="special-column-num">3篇</span> </li> 
+          <li> <a class="clearfix special-column-name" href="https://blog.csdn.net/entronk_star/category_7946139.html" data-report-click="{&quot;mod&quot;:&quot;popu_537&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4137&quot;,&quot;strategy&quot;:&quot;pc付费专栏左侧入口&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/entronk_star/category_7946139.html&quot;,&quot;ab&quot;:&quot;new&quot;}"> 
+            <div class="special-column-bar "></div> <img src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fimg-blog.csdnimg.cn%2F20201014180756724.png%3Fx-oss-process%3Dimage%2Fresize%2Cm_fixed%2Ch_64%2Cw_64&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2FEntronk_star%2Farticle%2Fdetails%2F108430911" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'"> <span class=""> 基础学习 </span> </a> <span class="special-column-num">26篇</span> </li> 
+          <li> <a class="clearfix special-column-name" href="https://blog.csdn.net/entronk_star/category_8223926.html" data-report-click="{&quot;mod&quot;:&quot;popu_537&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4137&quot;,&quot;strategy&quot;:&quot;pc付费专栏左侧入口&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/entronk_star/category_8223926.html&quot;,&quot;ab&quot;:&quot;new&quot;}"> 
+            <div class="special-column-bar "></div> <img src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fimg-blog.csdnimg.cn%2F20201014180756918.png%3Fx-oss-process%3Dimage%2Fresize%2Cm_fixed%2Ch_64%2Cw_64&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2FEntronk_star%2Farticle%2Fdetails%2F108430911" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'"> <span class=""> Git </span> </a> <span class="special-column-num">6篇</span> </li> 
+          <li> <a class="clearfix special-column-name" href="https://blog.csdn.net/entronk_star/category_8319231.html" data-report-click="{&quot;mod&quot;:&quot;popu_537&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4137&quot;,&quot;strategy&quot;:&quot;pc付费专栏左侧入口&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/entronk_star/category_8319231.html&quot;,&quot;ab&quot;:&quot;new&quot;}"> 
+            <div class="special-column-bar "></div> <img src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fimg-blog.csdnimg.cn%2F20201014180756927.png%3Fx-oss-process%3Dimage%2Fresize%2Cm_fixed%2Ch_64%2Cw_64&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2FEntronk_star%2Farticle%2Fdetails%2F108430911" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'"> <span class=""> 安卓开发环境 </span> </a> </li> 
+          <li> <a class="clearfix special-column-name" href="https://blog.csdn.net/entronk_star/category_8319233.html" data-report-click="{&quot;mod&quot;:&quot;popu_537&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4137&quot;,&quot;strategy&quot;:&quot;pc付费专栏左侧入口&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/entronk_star/category_8319233.html&quot;,&quot;ab&quot;:&quot;new&quot;}"> 
+            <div class="special-column-bar "></div> <img src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fimg-blog.csdnimg.cn%2F20201014180756916.png%3Fx-oss-process%3Dimage%2Fresize%2Cm_fixed%2Ch_64%2Cw_64&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2FEntronk_star%2Farticle%2Fdetails%2F108430911" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'"> <span class=""> 安卓开发 </span> </a> <span class="special-column-num">1篇</span> </li> 
+          <li> <a class="clearfix special-column-name" href="https://blog.csdn.net/entronk_star/category_8977316.html" data-report-click="{&quot;mod&quot;:&quot;popu_537&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4137&quot;,&quot;strategy&quot;:&quot;pc付费专栏左侧入口&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/entronk_star/category_8977316.html&quot;,&quot;ab&quot;:&quot;new&quot;}"> 
+            <div class="special-column-bar "></div> <img src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fimg-blog.csdnimg.cn%2F20201014180756757.png%3Fx-oss-process%3Dimage%2Fresize%2Cm_fixed%2Ch_64%2Cw_64&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2FEntronk_star%2Farticle%2Fdetails%2F108430911" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'"> <span class=""> 模块学习 </span> </a> <span class="special-column-num">3篇</span> </li> 
+          <li> <a class="clearfix special-column-name" href="https://blog.csdn.net/entronk_star/category_8977978.html" data-report-click="{&quot;mod&quot;:&quot;popu_537&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4137&quot;,&quot;strategy&quot;:&quot;pc付费专栏左侧入口&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/entronk_star/category_8977978.html&quot;,&quot;ab&quot;:&quot;new&quot;}"> 
+            <div class="special-column-bar "></div> <img src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fimg-blog.csdnimg.cn%2F20201014180756738.png%3Fx-oss-process%3Dimage%2Fresize%2Cm_fixed%2Ch_64%2Cw_64&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2FEntronk_star%2Farticle%2Fdetails%2F108430911" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'"> <span class=""> 单片机学习 </span> </a> <span class="special-column-num">11篇</span> </li> 
+         </ul> 
+        </div> 
+       </div> 
+      </div> 
+     </div> 
+    </aside> 
+   </div> 
+   <div class="recommend-right1  align-items-stretch clearfix" id="rightAsideConcision" data-type="recommend"> 
+    <aside class="recommend-right_aside"> 
+     <div id="recommend-right-concision"> 
+      <div class="flex-column aside-box groupfile" id="groupfileConcision"> 
+       <div class="groupfile-div1"> 
+        <h3 class="aside-title">目录</h3> 
+        <div class="align-items-stretch group_item"> 
+         <div class="pos-box"> 
+          <div class="scroll-box"> 
+           <div class="toc-box"></div> 
+          </div> 
+         </div> 
+        </div> 
+       </div> 
+      </div> 
+     </div> 
+    </aside> 
+   </div> 
+  </div> 
+  <div class="mask-dark"></div> 
+  <div class="skin-boxshadow"></div> 
+  <div class="directory-boxshadow"></div> 
+  <div class="comment-side-box-shadow comment-side-tit-close" id="commentSideBoxshadow"> 
+   <div class="comment-side-content"> 
+    <div class="comment-side-tit"> 
+     <div class="comment-side-tit-count">
+      评论&nbsp;
+      <span class="count">2</span>
+     </div> 
+     <img class="comment-side-tit-close" src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fcsdnimg.cn%2Frelease%2Fblogv2%2Fdist%2Fpc%2Fimg%2FcloseBt.png&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2FEntronk_star%2Farticle%2Fdetails%2F108430911">
+    </div>  
+    <div id="pcFlodCommentSideBox" class="pc-flodcomment-sidebox"> 
+     <div class="comment-fold-tit">
+      <span id="lookUnFlodComment" class="back"><img src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fcsdnimg.cn%2Frelease%2Fblogv2%2Fdist%2Fpc%2Fimg%2FcommentArrowLeftWhite.png&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2FEntronk_star%2Farticle%2Fdetails%2F108430911" alt=""></span>被折叠的&nbsp;
+      <span class="count"></span>&nbsp;条评论 
+      <a href="https://blogdev.blog.csdn.net/article/details/122245662" class="tip" target="_blank">为什么被折叠?</a> 
+      <a href="https://bbs.csdn.net/forums/FreeZone" class="park" target="_blank"> <img src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fcsdnimg.cn%2Frelease%2Fblogv2%2Fdist%2Fpc%2Fimg%2FiconPark.png&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2FEntronk_star%2Farticle%2Fdetails%2F108430911">到【灌水乐园】发言</a> 
+     </div> 
+     <div class="comment-fold-content"></div> 
+     <div id="lookBadComment" class="look-bad-comment side-look-comment"> 
+      <a class="look-more-comment">查看更多评论<img src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fcsdnimg.cn%2Frelease%2Fblogv2%2Fdist%2Fpc%2Fimg%2FcommentArrowDownWhite.png&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2FEntronk_star%2Farticle%2Fdetails%2F108430911" alt=""></a> 
+     </div> 
+    </div> 
+   </div> 
+   <div class="comment-rewarddialog-box"> 
+    <div class="form-box"> 
+     <div class="title-box">
+       添加红包 
+      <a class="btn-form-close"></a> 
+     </div> 
+     <form id="commentRewardForm"> 
+      <div class="ipt-box"> 
+       <label for="txtName">祝福语</label> 
+       <div class="ipt-btn-box"> 
+        <input type="text" name="name" id="txtName" autocomplete="off" maxlength="50"> 
+        <a class="btn-ipt btn-random"></a> 
+       </div> 
+       <p class="notice">请填写红包祝福语或标题</p> 
+      </div> 
+      <div class="ipt-box"> 
+       <label for="txtSendAmount">红包数量</label> 
+       <div class="ipt-txt-box"> 
+        <input type="text" name="sendAmount" maxlength="4" id="txtSendAmount" placeholder="请填写红包数量(最小10个)" autocomplete="off"> 
+        <span class="after-txt">个</span> 
+       </div> 
+       <p class="notice">红包个数最小为10个</p> 
+      </div> 
+      <div class="ipt-box"> 
+       <label for="txtMoney">红包总金额</label> 
+       <div class="ipt-txt-box error"> 
+        <input type="text" name="money" maxlength="5" id="txtMoney" placeholder="请填写总金额(最低5元)" autocomplete="off"> 
+        <span class="after-txt">元</span> 
+       </div> 
+       <p class="notice">红包金额最低5元</p> 
+      </div> 
+      <div class="balance-info-box"> 
+       <label>余额支付</label> 
+       <div class="balance-info">
+         当前余额
+        <span class="balance">3.43</span>元 
+        <a href="https://i.csdn.net/#/wallet/balance/recharge" class="link-charge" target="_blank">前往充值 &gt;</a> 
+       </div> 
+      </div> 
+      <div class="opt-box"> 
+       <div class="pay-info">
+         需支付：
+        <span class="price">10.00</span>元 
+       </div> 
+       <button type="button" class="ml-auto btn-cancel">取消</button> 
+       <button type="button" class="ml8 btn-submit" disabled="true">确定</button> 
+      </div> 
+     </form> 
+    </div> 
+   </div> 
+   <div class="rr-guide-box"> 
+    <div class="rr-first-box"> 
+     <img src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fcsdnimg.cn%2Frelease%2Fblogv2%2Fdist%2Fpc%2Fimg%2FguideRedReward02.png&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2FEntronk_star%2Farticle%2Fdetails%2F108430911" alt=""> 
+     <button class="btn-guide-known next">下一步</button> 
+    </div> 
+    <div class="rr-second-box"> 
+     <img src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fcsdnimg.cn%2Frelease%2Fblogv2%2Fdist%2Fpc%2Fimg%2FguideRedReward03.png&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2FEntronk_star%2Farticle%2Fdetails%2F108430911" alt=""> 
+     <button class="btn-guide-known known">知道了</button> 
+    </div> 
+   </div> 
+  </div> 
+  <div class="redEnvolope" id="redEnvolope"> 
+   <div class="env-box"> 
+    <div class="env-container"> 
+     <div class="pre-open" id="preOpen"> 
+      <div class="top"> 
+       <header> 
+        <img class="clearTpaErr" :src="redpacketAuthor.avatar" alt="" src="https://ziquyun.com/main/csdn/img?url=&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2FEntronk_star%2Farticle%2Fdetails%2F108430911"> 
+        <div class="author">
+         成就一亿技术人!
+        </div> 
+       </header> 
+       <div class="bot-icon"></div> 
+      </div> 
+      <footer> 
+       <div class="red-openbtn open-start"></div> 
+       <div class="tip">
+         领取后你会自动成为博主和红包主的粉丝 
+        <a class="rule" target="_blank">规则</a> 
+       </div> 
+      </footer> 
+     </div> 
+     <div class="opened" id="opened"> 
+      <div class="bot-icon"> 
+       <header> 
+        <a class="creatorUrl" href="" target="_blank"> <img class="clearTpaErr" src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fprofile-avatar.csdnimg.cn%2Fdefault.jpg%212&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2FEntronk_star%2Farticle%2Fdetails%2F108430911" alt=""> </a> 
+        <div class="author"> 
+         <div class="tt">
+          hope_wisdom
+         </div> 发出的红包 
+        </div> 
+       </header> 
+      </div> 
+      <div class="receive-box"> 
+       <header></header> 
+       <div class="receive-list"> 
+       </div> 
+      </div> 
+     </div> 
+    </div> 
+    <div class="close-btn"></div> 
+   </div> 
+  </div> 
+  <div class="pay-code"> 
+   <div class="pay-money">
+    实付
+    <span class="pay-money-span" data-nowprice="" data-oldprice="">元</span>
+   </div> 
+   <div class="content-blance">
+    <a class="blance-bt" href="javascript:;">使用余额支付</a>
+   </div> 
+   <div class="content-code"> 
+    <div id="payCode" data-id=""> 
+     <div class="renovate"> 
+      <img src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fcsdnimg.cn%2Frelease%2Fblogv2%2Fdist%2Fpc%2Fimg%2Fpay-time-out.png&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2FEntronk_star%2Farticle%2Fdetails%2F108430911"> 
+      <span>点击重新获取</span> 
+     </div> 
+    </div> 
+    <div class="pay-style">
+     <span><img src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fcsdnimg.cn%2Frelease%2Fblogv2%2Fdist%2Fpc%2Fimg%2Fweixin.png&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2FEntronk_star%2Farticle%2Fdetails%2F108430911"></span>
+     <span><img src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fcsdnimg.cn%2Frelease%2Fblogv2%2Fdist%2Fpc%2Fimg%2Fzhifubao.png&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2FEntronk_star%2Farticle%2Fdetails%2F108430911"></span>
+     <span><img src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fcsdnimg.cn%2Frelease%2Fblogv2%2Fdist%2Fpc%2Fimg%2Fjingdong.png&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2FEntronk_star%2Farticle%2Fdetails%2F108430911"></span>
+     <span class="text">扫码支付</span>
+    </div> 
+   </div> 
+   <div class="bt-close"> 
+    <svg t="1567152543821" class="icon" viewbox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="10924" xmlns:xlink="http://www.w3.org/1999/xlink" width="12" height="12"> 
+     <defs> 
+      <style type="text/css"></style> 
+     </defs> 
+     <path d="M512 438.378667L806.506667 143.893333a52.032 52.032 0 1 1 73.6 73.621334L585.621333 512l294.485334 294.485333a52.074667 52.074667 0 0 1-73.6 73.642667L512 585.621333 217.514667 880.128a52.053333 52.053333 0 1 1-73.621334-73.642667L438.378667 512 143.893333 217.514667a52.053333 52.053333 0 1 1 73.621334-73.621334L512 438.378667z" fill="" p-id="10925"></path> 
+    </svg> 
+   </div> 
+   <div class="pay-balance"> 
+    <input type="radio" class="pay-code-radio" data-type="details"> 
+    <span class="span">钱包余额</span> 
+    <span class="balance" style="color:#FC5531;font-size:14px;">0</span> 
+    <div class="pay-code-tile"> 
+     <img src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fcsdnimg.cn%2Frelease%2Fblogv2%2Fdist%2Fpc%2Fimg%2Fpay-help.png&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2FEntronk_star%2Farticle%2Fdetails%2F108430911" alt=""> 
+     <div class="pay-code-content"> 
+      <div class="span"> 
+       <p class="title">抵扣说明：</p> 
+       <p> 1.余额是钱包充值的虚拟货币，按照1:1的比例进行支付金额的抵扣。<br> 2.余额无法直接购买下载，可以购买VIP、付费专栏及课程。</p> 
+      </div> 
+     </div> 
+    </div> 
+   </div> 
+   <a class="pay-balance-con" href="https://i.csdn.net/#/wallet/balance/recharge" target="_blank"><img src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fcsdnimg.cn%2Frelease%2Fblogv2%2Fdist%2Fpc%2Fimg%2Frecharge.png&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2FEntronk_star%2Farticle%2Fdetails%2F108430911" alt=""><span>余额充值</span></a> 
+  </div> 
+  <div style="display:none;">  
+  </div> 
+  <div class="keyword-dec-box" id="keywordDecBox"></div>  
+  <!-- 富文本柱状图  --> 
+  <link rel="stylesheet" href="https://csdnimg.cn/release/blog_editor_html/release1.6.12/ckeditor/plugins/chart/chart.css">       
+  <link rel="stylesheet" href="https://csdnimg.cn/release/blog_editor_html/release1.6.12/ckeditor/plugins/codesnippet/lib/highlight/styles/atom-one-light.css">                 
+ </body>
+</html>
