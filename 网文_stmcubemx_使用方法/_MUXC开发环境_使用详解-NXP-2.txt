@@ -1,0 +1,147 @@
+
+（注意：这个说明是NXP的工具，不是STM32的MCUX）   //只能做一个参考
+
+
+
+疑问1： 为什么导入一个STM320116的工程，显示的还是以前旧的RT1011的工程
+答： 这个调入到NXP的MCUX了。正确的做法是，新建一个空白的wakespace的目录，再从新导入，导入选sdk的整个目录，但导入的工程只选中gpio toggle一个工程
+       点击桌面stm32cube\import project\新建一个空白workspace8\导入整个STM32Cube_FW_C0_V1.1.0\只选中“gpio toggle”工程\编译，ok
+
+疑问2：如何在MCUX中生成keil的工程
+
+
+
+RT1011 的开发环境MCUXpresso使用技巧 (eclipse)   （注意：这个是NXP的工具，不是STM32的MCUX）
+    
+
+一。工程的管理
+   
+     1. 工作空间和工程目录的区别
+
+         1）。跟keil的工程比较，
+                 。keil可直接点工程文件打开工程。
+                 。MCUX不能点工程文件打开工程，只能先打开workspace。然后把工程导入到workspace中
+                    导入时可选择复制工程文件到workspace中，这样的话workspace目录相当于一个大的工程目录，
+                    跟keil类似，只是打开工程比没keil直观，是打开一个工作空间(一下子会打开多个工程)
+
+        2）。区别; 
+                 。不能直接打开工程，只能把工程导入到工作空间中才能打开  （编译几乎不受影响）
+                 。如果选择复制工程文件到workspace2中，拷贝时，可以直接拷贝workspace2目录到其他电脑
+
+
+    2。新建立一个工程 
+                。在f盘建立一个目录， f:\workspace2
+                。点击MCUXpreeso.exe
+                。然后按提示，从sdk中导入一个工程   （可选择复制工程文件到workspace2中）
+
+
+    3。导入一个以前的工程到这个新的工作空间
+                。在f盘建立一个目录， f:\workspace2
+                。点击MCUXpreeso.exe
+                。然后按提示，从电脑硬盘目录里中导入一个工程   （可选择复制工程文件到workspace2中）
+
+
+
+二。使用cnfig tools来配置引脚
+
+     方法1：  直接点击工程目录下面的 .mex 文件
+     方法2： 菜单“配置工具”\ 引脚 （需要选择project）
+
+                 。选择引脚
+                 。选择引脚的复用功能
+                 。在中间的封装图中，可清晰看到引脚的使用情况，和个复用功能的使用情况
+                 。更新源文件
+                 。看到有“更改”，点击“更改”，会显示修改前和修改后d两个文件d比较
+                 。点确认，ok
+
+
+三。打开已关闭的引脚配置
+
+     。菜单 窗口\显示视图\引脚
+
+
+
+四。常用操作
+
+1. 设置Include路径  (这一条参考dialog)
+   。项目wrbl右键->properties -> c,c++ general -> paths and symbols ->Includes -> GNUC，点击Add选项卡添加你的头文件路径。
+   。参考以前的路径，使用相对路径
+   。点选 is workspace path 
+   。按ok
+
+
+2. 修改tab     (这一条参考dialog ，已验证)   // 在行号上右键 -- preference更简单
+  1.点击 window->preference-,依次选择 General->Editors->Text Editors,选中右侧的 insert space for tabs; 保存，第一步完成；（把Displayed tab width 也设置成3）
+  2.点击 window->preference-,依次选择 java（或C++）->code style ->formatter,点击右侧的editor，选则左侧 tab policy的值为spaces only,确定，应用保存即可 （把Indentation size he Tab size 都设成3）
+
+
+2. 显示行号 （推荐方法1）
+   方法1： 右键点击其侧边栏，如图所示的位置，就会显示一个菜单，勾选“show line numbers”即可显示行号
+   方法2： Window->Preferences->Gerenal->Editors->Text Editors，然后勾选右侧的“show line numbers”即可显示行号~
+ 
+
+3. 将已有文件添加到project中 ，推荐第3种方式   (这一条参考dialog ，待验证)
+      
+      将已有的文件加入到一个项目中目前有三种方式：第一种是象在IVJ中的一样，用IDE的File菜单中的Import功能将文件导
+      入到项目中。这也是推荐的方式。
+      
+      第二种是从Windows的资源管理器中直接拖动文件到项目中。
+      第三种就是直接将文件拷贝到项目文件夹中，然后在Eclipse的资源浏览窗口中选择项目或文件夹并执行从本地刷新功能（Refresh from locate）。  //--推荐
+      
+      需要说明的一点是，项目文件夹可以放在计算机的任何位置，并且可以在Eclipse中用新建项目的方法将项目路径指定到已经存在的项目文件夹，然后在Eclipse中刷新即可。
+      但要注意的是，任何项目文件夹建立或指定，目前都只能在Eclipse中用新建项目
+      的方法来实现，即使是在缺省存储项目文件夹的workspace路径下新建立一个文件夹，在Eclipse环境中也是无法将它变成一
+      个项目，也就是说，这个文件夹对Eclipse是不可视的。
+
+3. 如何看工程中项目在电脑硬盘中的目录位置   (已验证)
+
+   。右键项目\properties\Resource （链接的资源）
+   。 看下面的各项  
+      PROJECT_LOC： F:\workspace2\prj_led
+                                 
+                                                         
+4. 书签参考   （待完成）
+
+    //添加书签：
+    //在编辑框左边栏右击 > Add Bookmark > 编辑书签名称（可以直接使用默认名称）> OK
+
+    //查看书签：
+    //Window > Show View > Other > 输入book字样会出现Bookmarks > OK
+    //然后就可以在IDE的底部出现的Bookmarks视图查看和编辑所有书签了
+
+5. 设置jlink目录     （待完成）
+
+    Window\Preferences：然后在"Run\Debug"中选择SEGGER J-Link，设置正确的安装路径，例如现在的目录如下：
+       JLinkGDBServerCL.exe
+       C:\Program Files (x86)\SEGGER\JLink_V512f
+
+5. 设置debug目录参考     （待完成）
+
+    Window=》Preferences：然后选择SEGGER Ozone，设置正确的安装路径，例如现在的目录如下：
+       JLinkGDBServerCL.exe
+       C:\Program Files\SEGGER\Ozone V2.40b
+ 
+
+7. 编译              ok
+    。是锤子图标
+    。选第1个debug
+
+7. 修改一两个文件，不全部重新编译的方法 --ok   （明显改善，7分钟变1分钟）        （待完成）
+    下面任何一种修改方法都可以 
+    。project菜单下 <build automatically> 不要钩上
+    。windows->preferences->workspace项右边有个<build automatically>不要钩上
+
+ 
+8. 烧写
+    。芯片图标 （sop8长方形芯片）
+    。选第2个 , DAP
+
+10. 批量注释：
+
+     Ctrl + /可以多行同时注释，当多行同时选中后，再按Ctrl + /可取消批量注释
+     Ctrl + Shift + /，这个快捷的多行注释是用/* ... */ 
+
+
+
+
+
