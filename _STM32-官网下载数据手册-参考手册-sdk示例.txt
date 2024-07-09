@@ -1,0 +1,50 @@
+
+以STM32F030CCT6为例：
+
+1.  打开官网：   www.st.com
+2.  输入 STM32F030CCT6， 点放大镜图标按钮，搜索
+3. 左边显示products(1) , 点击右边下面“part number”下面的 STM32F030CC
+
+
+一。 下载数据手册
+
+     。点击左边的“download datasheet"
+
+
+二。下载参考手册和其他手册  （几乎所有的官方文档都可在这里找到）
+
+     。接上面，等待30秒钟，在download datasheet" 下面显示出  "Documentation“ 和 "Tool & Software" 等
+     。点击左边“download datasheet" 下面的 "Documentation"
+     。鼠标一直向下拉，直到看到“ Reference Manuals (1)”，点击下载 " RM0360 ......"
+     。鼠标上下滚动，查看需要下载的其他资料 
+ 
+
+三。下载EVK示例
+
+     。点击左边“Documentation" 右边的 "Tool & Software"
+     。看下面的 ”Recommended Tools & Software“
+     。查看下面的 ”Embedded software"
+     。我们看到有“STM32CUBEF0", 点击可以下载  （或点击 Browse more）
+     。進入下载页面，鼠标一直往下拉，直到看到 " Get Software"
+     。看到”STM32CubeF0	STM32Cube MCU Package for STM32F0 series	1.11.0“， 点击右边的Getlatest下载最新版本
+     。ok
+
+四。查看EVK板
+
+     。点击左边“Documentation" 右边的 "Tool & Software"
+     。看下面的 ”Recommended Tools & Software“
+     。查看下面的 ”Evaluation tools"
+     。我们看到有两块EVK板“32F072BDISCOVERY" 和 ”NUCLEO-F042K6", 点击可以打开查看及购买 （也可把型号输入到digikey等购买）
+
+
+
+
+
+
+
+
+
+
+
+
+

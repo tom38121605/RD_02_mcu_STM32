@@ -1,0 +1,84 @@
+
+---------------------------------------- 硬件烧录工具 ---------------------------------------------
+
+   。硬件烧录工具1： 官方evk内置 st link     
+   。硬件烧录工具2： jlink     
+   。硬件烧录工具3： uart    
+
+
+---------------------------------------- 烧录方法之一： ide内部烧录 （st link， jlink  ）-------------------------------------------
+
+1. 烧录方法1： 在keil中烧录    //  应所有stm32芯片都一样 
+
+2.  烧录方法2： 在 cubeide开发环境中的工具链烧录 （ 调用 STM32 ST-LINK Utility）    //  应所有stm32芯片都一样 
+
+    C:\Program Files\STMicroelectronics\STM32Cube\STM32CubeProgrammer\bin\STM32_Programmer_CLI.exe
+
+    ${workspace_loc:/ommocom/Release}
+
+    -c port=swd -w ommocom.hex -s 0x8000000 #L
+
+    上面也可用elf文件烧录，jlink应该也类似
+
+
+ ---------------------------------------- 烧录方法之二：PC软件烧录 -------------------------------------------
+
+1.  stm32c011 
+
+    准备： 烧录 hex文件： 硬件烧录器，PC烧录软件，烧录固件文件，烧录过程  
+
+   。硬件烧录工具： 官方evk内置 st link     
+
+   。烧录软件： PC烧录软件， STM32 ST-LINK Utility
+   。烧录软件下载： https://www.st.com/en/development-tools/stm32cubeprog.html
+ 
+   。烧录固件文件： 略
+   。烧录过程：   略  （3种方法都很简单） 
+
+2.  STM32H7ARIT
+
+   准备：  烧录器，烧录软件和烧录过程  （板12 STM32H7ARIT ）
+   。烧录器：    用JLINK  V9 （ARM 仿真器）  (下面两个圆凹里有2个橙点)
+   。PC烧录软件： 使用Jflash Lite v7.58B 
+
+   烧录注意点：
+   。先插烧录器，再给板子上电
+   。连接线，黑色一边，对应边上是GND的引脚那边
+
+3. STM32F429ZI 
+
+烧录器，烧录软件和烧录过程  （板34 STM32F429ZI  ）
+   。烧录器：   板上自带ST-LINK
+   。PC烧录软件： STM32 ST-LINK Utility
+
+
+---------------------------------------- 烧录方法之三：vscode工具链编译和烧录 ------ （板12 STM32H7ARIT ）-------------------------------------
+
+1. 编译环境vscode，详细操作  (在win10电脑)
+    。使用工具链编译，也可安装git直接在git中编译，后者更简单一点
+   。 编译环境建立参考： \网友_vscode_编译烧录_all
+   。编写makefile文件
+   。打开git，進入makefile所在目录，输入make，回车，即开始编译
+
+
+烧录器，烧录软件和烧录过程   （板12 STM32H7ARIT ）
+   。烧录器：   板上自带ST-LINK
+   。PC烧录软件： STM32 ST-LINK Utility
+
+
+---------------------------------------- 烧录方法之四：uart串口烧录 -------------------------------------
+
+串口（官方内置ISP）烧录的基本操作：
+
+      初始值： BOOT LOCK =0, nBOOT_SEL=1, nBOOT0=1, nBOOT1 =1 （因nBOOT_SEL为1，启动类型完全由熔丝位决定，可忽略BOOT0引脚）
+
+      1). 运行 stm32cubeprog的pc烧录软件   
+      2). 用STLINK方式连接烧录器，把熔丝位nBoot0设置改为0（切换到可uart烧录，也可stlink烧录），Apply （会跳出提示框programmed 成功）
+      3). 断开stlink， 按reset键，用uart方式连接烧录器（如未找到com端口，则在右边刷新按钮上点一下），
+      4). 用串口下载hex文件
+      5). 再用stlink方式连接，把熔丝位nBoot0改回1（不能uart烧录，只能stlink，jink烧录），回到原始设置  （这样后NRST和uart的功能就正常了）
+      6). 串口方式每次连接烧录前，最好都要按一下NRST按键
+
+
+
+

@@ -1,0 +1,33 @@
+
+
+1. 烧录tx-85版本（或101版本） （保持bin文件数组原始大小，后面只有4个字节）              //内置数组里有led程序二的bin文件  （小于4k）
+
+2. 整片擦除rx芯片  （rx芯片包含2个程序，下面的bootload和上面的led）
+
+3. 烧写led程序一 （不要求小于4k）到8-3000， 烧写bootload程序到8-0000
+
+4. 重启，bootload运行，读bootflag=FF，跳转运行旧的led 
+
+5. 旧的led运行10秒后，写bootflag=AA，然后softreset
+
+6. 重启，bootload运行， 读 bootflag=AA, 从tx接收新的led的bin文件
+
+7. 接收完毕新led的bin文件，再crc检查，如果crc正确，则写bootflag=FF，然后跳转运行新的led程序  
+
+8. ok
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
