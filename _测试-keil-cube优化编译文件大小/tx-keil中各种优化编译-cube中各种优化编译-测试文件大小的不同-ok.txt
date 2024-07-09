@@ -1,0 +1,85 @@
+
+
+
+=====================cube tx====2k============================
+
+默认选项： O0 + 12✔ 
+推荐： 待定  （或O3）
+
+说明1： 下面的12两项要打勾，不然文件会大6k左右
+说明2： O0外比其他的大4k多，单稳定性都没有明显影响
+
+   text	   data	    bss	    dec	    hex	filename
+
+
+   16432	   2060	   3844	  22336	   5740	soma_stm32_master.elf    //O0 + 无✔    //D2 err
+
+    -----
+
+   10508	   2060	   3828	  16396	   400c	soma_stm32_master.elf    //O0 + 12✔       //D2 err
+   5288	   2060	   3828	  11176	   2ba8	soma_stm32_master.elf   //Og + 12✔        //D3 err
+   5480	   2060	   3828	  11368	   2c68	soma_stm32_master.elf   //O1 + 12✔        //D3 err
+   5488	   2060	   3828	  11376	   2c70	soma_stm32_master.elf   //O2 + 12✔        //D3 err
+   5692	   2060	   3828	  11580	   2d3c	soma_stm32_master.elf   //O3 + 12✔        //D3 err
+   4932	   2060	   3828	  10820	   2a44	soma_stm32_master.elf   //Os + 12✔         //D3 err
+   4932	   2060	   3828	  10820	   2a44	soma_stm32_master.elf   //Ofast + 12✔      //D3 err
+
+    -----
+
+  10508	   2060	   3828	  16396	   400c	soma_stm32_master.elf    //O0 + 123✔    //D2 err
+
+
+
+===================cube tx====256==============================
+
+ 10508	    268	   2036	  12812	   320c	soma_stm32_master.elf      //O0 + 12✔    //D2 err    //256
+  5692	    268	   2036	   7996	   1f3c	soma_stm32_master.elf      //O3 + 12✔    //D3 err    //256
+
+---
+
+  10508	   2060	   3828	  16396	   400c	soma_stm32_master.elf      //O0 + 12✔     //D2 err   //2k
+
+
+===================KEIL tx====256==============================
+
+
+Program Size: Code=4204 RO-data=320 RW-data=260 ZI-data=1500        //microlib +O1      //D3 ok   //256
+
+//Program Size: Code=4300 RO-data=320 RW-data=2052 ZI-data=3292     //microlib +O1      //D3 ok      //--2k
+
+
+
+===================KEIL tx====2k==============================
+
+默认选项： O3
+推荐：  microlib + Os 
+
+说明： 勾选microlib，大约会节省500-650字节 ，基本不影响稳定性
+说明： Oz的文件最小，单不稳定
+说明：O1和Os的文件很小，也比较稳定
+疑问：数组从256增加到2k， Rw-data和ZI-DATA都增加了约1.7k大小，而RAM=RW + ZI （相当于RAM增加l3.4k大小）
+
+Program Size: Code=3748 RO-data=320 RW-data=2052 ZI-data=3284     //microlib +OZ      //D3 err
+
+Program Size: Code=4064 RO-data=320 RW-data=2052 ZI-data=3292     //microlib +Os      //D3 ok  
+Program Size: Code=7100 RO-data=320 RW-data=2052 ZI-data=3284     //microlib +Ofast  //D3 ok    
+Program Size: Code=7100 RO-data=320 RW-data=2052 ZI-data=3284     //microlib +O3      //D3 ok
+Program Size: Code=6980 RO-data=320 RW-data=2052 ZI-data=3292     //microlib +O2      //D3 ok  
+Program Size: Code=4300 RO-data=320 RW-data=2052 ZI-data=3292     //microlib +O1      //D3 ok    
+
+Program Size: Code=8656 RO-data=372 RW-data=2052 ZI-data=3292     //microlib +O0      //D2 err
+  
+ ---
+
+Program Size: Code=4248 RO-data=320 RW-data=2052 ZI-data=3892      // Oz                     //D3 err     
+
+Program Size: Code=4564 RO-data=320 RW-data=2052 ZI-data=3900      // Os                     //D3 ok   
+Program Size: Code=7740 RO-data=320 RW-data=2052 ZI-data=3892      // Ofast                 //D3 ok  
+Program Size: Code=7740 RO-data=320 RW-data=2052 ZI-data=3892      // O3                     //D3 ok
+Program Size: Code=7620 RO-data=320 RW-data=2052 ZI-data=3900      // O2                     //D3 ok  
+Program Size: Code=4940 RO-data=320 RW-data=2052 ZI-data=3900       // O1                     //D3 ok 
+
+Program Size: Code=9292 RO-data=372 RW-data=2052 ZI-data=3900      // O0                      //D2 err
+
+ 
+ 

@@ -1,0 +1,56 @@
+﻿
+
+only for data test.
+
+C:\workspace\ommo_eval_sdk_v0.17.1_alg2645\ommo_app\data
+
+===================KEIL rx==== ==============================
+
+默认选项： O3
+推荐：  microlib + Os 
+
+//说明： 勾选microlib，大约会节省500-650字节 ，基本不影响稳定性
+//说明： Oz的文件最小，但有时不稳定
+//说明：O1和Os的文件很小，也比较稳定
+
+
+Program Size: Code=4440 RO-data=340 RW-data=4 ZI-data=1828       //microlib +OZ      //D3 ok
+Program Size: Code=4708 RO-data=340 RW-data=4 ZI-data=1828       //microlib +Os      //D3 ok  
+Program Size: Code=11568 RO-data=320 RW-data=4 ZI-data=1828       //microlib +Ofast  //D3 ok    
+Program Size: Code=11568 RO-data=320 RW-data=4 ZI-data=1828       //microlib +O3      //D3 ok
+Program Size: Code=10672 RO-data=320 RW-data=4 ZI-data=1828       //microlib +O2      //D3 ok  
+Program Size: Code=5676 RO-data=340 RW-data=4 ZI-data=1828         //microlib +O1      //D3 ok
+Program Size: Code=9888 RO-data=444 RW-data=4 ZI-data=1828        //microlib +O0       //D3 ok    
+  
+ ---
+
+Program Size: Code=5020 RO-data=340 RW-data=4 ZI-data=2436        // Oz                     //D3 ok   
+Program Size: Code=5288 RO-data=340 RW-data=4 ZI-data=2436        // Os                     //D3 ok   
+Program Size: Code=12288 RO-data=320 RW-data=4 ZI-data=2436        // Ofast                 //D3 ok  
+Program Size: Code=12288 RO-data=320 RW-data=4 ZI-data=2436        // O3                     //D3 ok
+Program Size: Code=11392 RO-data=320 RW-data=4 ZI-data=2436        // O2                     //D3 ok  
+Program Size: Code=6396 RO-data=340 RW-data=4 ZI-data=2436         // O1                     //D3 ok 
+Program Size: Code=10600 RO-data=444 RW-data=4 ZI-data=2436        // O0                      //D3 ok 
+
+
+=====================cube rx==== ============================
+
+默认选项： O0 + 12✔ 
+推荐： 待定  （或O3）
+
+说明1： 下面的12两项要打勾，不然文件会大6k左右
+//说明2： O0外比其他的大4k多，但稳定性都没有明显影响
+
+   text	   data	    bss	    dec	    hex	filename
+
+
+  12024	      8	   2364	  14396	   383c	soma_instrument_tracker_12612.elf    //O0 + 12✔       //D3 ok
+   5956	      8	   2364	   8328	   2088	soma_instrument_tracker_12612.elf   //Og + 12✔        //D3 ok
+   6156	      8	   2364	   8528	   2150	soma_instrument_tracker_12612.elf   //O1 + 12✔        //D3 ok
+   6132	     12	   2364	   8508	   213c	soma_instrument_tracker_12612.elf   //O2 + 12✔        //D3 ok
+   7204	     12	   2368	   9584	   2570	soma_instrument_tracker_12612.elf   //O3 + 12✔        //D3 ok
+   5552	      8	   2364	   7924	   1ef4	soma_instrument_tracker_12612.elf   //Os + 12✔         //D3 ok
+   7204	     12	   2368	   9584	   2570	soma_instrument_tracker_12612.elf   //Ofast + 12✔      //D3 ok
+
+ 
+
