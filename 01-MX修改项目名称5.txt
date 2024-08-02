@@ -1,6 +1,6 @@
 
 
-1. 建立一个文件夹，将此文件夹命名为正确的工程名。如 d:\work27\ommcom
+1. 建立一个文件夹，将此文件夹命名为新的工程名。如 d:\work27\ommcom
 2. 打开.ico文件， 点击file另存为工程到新建的文件夹中(d:\work27\ommcom)。（工程名称会自动修改： 如 prj1  修改为  ommocom）
 3. 拷贝原work18\prj中的core目录和driver目录到新目录work27\ommcom
 4. 打开 d:\work27\ommcom\ommocom.ico，点击create code按钮生成keil工程代码。

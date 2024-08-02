@@ -1,0 +1,89 @@
+==================推荐=========================
+
+
+#include "stm32f0xx.h"
+ 
+// 中断回调函数声明
+void EXTI_Callback(void);   //看有的stm32的例子中没有这个函数声明，实际上是最好加个声明的
+ 
+int main(void) {
+    // 初始化GPIO和NVIC设置
+    // ...
+ 
+    // 配置EXTI线以触发中断
+    // ...
+ 
+    // 使能EXTI中断
+    // ...
+ 
+    // 主循环
+    while (1) {
+        // 执行其他任务
+    }
+}
+ 
+// 中断服务例程
+void EXTI0_1_IRQHandler(void) {
+    if (EXTI_GetITStatus(EXTI_Line0) != RESET) {
+        EXTI_ClearITPendingBit(EXTI_Line0); // 清除中断标志位
+        EXTI_Callback(); // 调用中断回调函数
+    }
+}
+ 
+// 中断回调函数定义
+void EXTI_Callback(void) {
+    // 处理EXTI线上的中断事件
+    // ...
+}
+
+=============加个指针似乎有点画She添足====================
+
+#include "stm32f0xx.h"
+ 
+// 声明回调函数指针类型
+typedef void (*CallbackFunction)(void);
+ 
+// 回调函数声明
+void ButtonISR_Callback(void);
+ 
+// 全局变量：回调函数指针
+CallbackFunction ButtonISR_CallbackFunction = 0;
+ 
+// 中断服务程序
+void EXTI0_1_IRQHandler(void)
+{
+    if (EXTI->PR & EXTI_PR_PR0) // 检查线路0中断标志
+    {
+        EXTI->PR = EXTI_PR_PR0; // 清除线路0中断标志
+        if (ButtonISR_CallbackFunction) {
+            ButtonISR_CallbackFunction(); // 调用回调函数
+        }
+    }
+}
+ 
+// 回调函数实现
+void ButtonISR_Callback(void)
+{
+    // 处理按键中断事件
+}
+ 
+// 在主程序中设置回调函数
+int main(void)
+{
+    // ...初始化代码...
+ 
+    // 设置NVIC以允许中断
+    NVIC_EnableIRQ(EXTI0_1_IRQn);
+ 
+    // 设置EXTI线路0为中断源，并使能中断
+    EXTI->IMR |= EXTI_IMR_MR0;
+    EXTI->RTSR |= EXTI_RTSR_TR0;
+ 
+    // 设置回调函数
+    ButtonISR_CallbackFunction = ButtonISR_Callback;
+ 
+    // ...其他初始化和循环...
+}
+
+
+
