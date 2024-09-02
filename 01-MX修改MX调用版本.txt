@@ -4,5 +4,3 @@ MxDb.Version=DB.6.0.92
 MxCube.Version=6.11.1
 MxDb.Version=DB.6.0.111
 
-
-
