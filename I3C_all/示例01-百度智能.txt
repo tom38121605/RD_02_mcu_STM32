@@ -1,0 +1,80 @@
+STM32的I3C（Inter-Integrated Circuit，即改进的I2C）是一个基于I2C协议的高级版本，旨在提供更低的功耗、更高的数据速率以及更强的噪声抵抗能力。STM32系列微控制器支持I3C，这使得它们在需要高速通信和低功耗的应用中更加有用。
+
+下面，我将提供一个基本的STM32 I3C示例，包括如何配置STM32微控制器上的I3C接口，以及如何与一个I3C从设备进行通信。
+
+硬件准备
+
+STM32开发板（例如STM32F4 Discovery或STM32F746 Discovery）
+
+I3C从设备（例如一个简单的I3C EEPROM或传感器模块）
+
+连接线（例如杜邦线）
+
+软件准备
+
+STM32CubeMX 或 STM32CubeIDE：用于配置和开发环境。
+
+ST官方库：用于编写和编译代码。
+
+步骤 1: 创建项目
+
+打开STM32CubeMX，选择你的STM32芯片。
+
+在“Pinout & Configuration”标签中，搜索并启用“I3C”接口。
+
+配置I3C接口的参数，如速度（例如：100 kHz, 400 kHz, 1 MHz等），从设备的地址等。
+
+生成代码。
+
+步骤 2: 配置代码
+
+在生成的代码基础上，进行以下配置：
+
+#include "main.h"
+#include "i3c.h"
+ 
+void SystemClock_Config(void);
+static void MX_I3C1_Init(void);
+static void I3C_Write(uint8_t deviceAddress, uint8_t regAddress, uint8_t data);
+static void I3C_Read(uint8_t deviceAddress, uint8_t regAddress, uint8_t *data);
+ 
+int main(void)
+{
+    HAL_Init();
+    SystemClock_Config();
+    MX_I3C1_Init();
+ 
+    // 示例：向从设备写入数据和从从设备读取数据
+    uint8_t dataToWrite = 0xAA;
+    uint8_t dataRead;
+    uint8_t regAddress = 0x00; // 假设的寄存器地址
+    uint8_t deviceAddress = 0x50; // 从设备的I3C地址
+ 
+    I3C_Write(deviceAddress, regAddress, dataToWrite);
+    HAL_Delay(100); // 等待数据写入完成
+    I3C_Read(deviceAddress, regAddress, &dataRead);
+    HAL_Delay(100); // 等待数据读取完成
+ 
+    // 输出读取的数据，调试使用
+    printf("Read Data: 0x%X\r\n", dataRead);
+ 
+    while (1)
+    {
+    }
+}
+ 
+static void MX_I3C1_Init(void)
+{
+    hi3c1.Instance = I3C1; // 根据实际使用的I3C接口调整
+    hi3c1.Init.Timing = 0x40912732; // 根据实际配置调整，这里使用默认值示例
+    hi3c1.Init.OwnAddress1 = 0x00; // 主设备的地址，通常设置为0（广播地址）或特定值，具体看需求设置
+    hi3c1.Init.AddressingMode = I3C_ADDRESSINGMODE_7BIT; // 7位寻址模式
+    hi3c1.Init.DualAddressMode = I3C_DUALADDRESS_DISABLE; // 不使用双地址模式
+    hi3c1.Init.OwnAddress2 = 0x00; // 未使用，保持为0即可
+    hi3c1.Init.OwnAddress2Masks = I3C_OA2_NOMASK; // 未使用，保持为默认值即可
+    hi3c1.Init.GeneralCallMode = I3C_GENERALCALL_DISABLE; // 不使用通用调用模式
+    hi3c1.Init.NoStretchMode = I3C_NOSTRETCH_DISABLE; // 不使用无延时模式（根据需要选择）
+    HAL_I3C_Init(&hi3c1); // 初始化I3C接口
+}
+ 
+static void I3C_Write(uint8_t deviceAddress,
