@@ -6,7 +6,7 @@
 3. 左边显示products(1) , 点击右边下面“part number”下面的 STM32F030CC
 
 
-一。 下载数据手册
+一。 下载数据手册 (快速方式)
 
      。点击左边的“download datasheet"
 

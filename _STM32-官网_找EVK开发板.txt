@@ -1,0 +1,25 @@
+
+以STM32H503RB为例：
+
+1.  打开官网：   www.st.com
+2.  输入STM32H503RB， 点放大镜图标按钮，搜索
+3. 在列表中，点击STM32H503RB
+4.  下面显示“download datasheet"， 点击下面的“tools & software"
+5. 下面有一块EVK的图片，下面名称为”NUCLEO-H03RB"
+6. 点击”NUCLEO-H03RB"的EVK板， 点击“overview”右边的“CAD Resources"
+    下拉界面，找到”Schematic Pack“， 根据买的开发板的版本，下载相应的sch文件
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
