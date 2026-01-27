@@ -1,0 +1,100 @@
+
+ 
+
+===============stmcube32ide 下载和安装======================
+
+https://blog.csdn.net/qq_49053936/article/details/134628947       //教程
+https://www.st.com/zh/development-tools/stm32cubeide.html     //下载地址，选windows版本
+
+
+
+=====================STM32CUBEide====================================
+
+
+1. 打开MX生成的cubeide工程  （在原系目录打开cubeide）
+    。双击.cproject文件
+    。选择cubeide目录，一般选.cproject的上两级目录 (如： d:\workspace38)
+
+    。菜单file\import\General\Existing Projects ...     //如果该工程已存在，这一步可省略  //MX生成的工程可跳过
+    。Select root directory\选择.cproject的上一级目录  (如： d:\workspace38\comommo)  //MX生成的工程可跳过
+    。下面不选copy到本目录\点击完成，即ok                      //MX生成的工程可跳过
+
+2. 添加include目录
+    。点击左上角列表上的工程名\右键\Properities
+    。c/c++  General\ paths and Symbols
+    。点击“add”，选择“is workspace ... ”，点击"workspace"添加相应的include目录
+    。点击apply and close即ok
+
+3. 生成hex目录
+   右键project\属性\c/c++ Build \ Settings \ MCU Post build outputs 
+
+
+4. 下载烧录： （方法1 -- 推荐）
+    。菜单 run\run    （或直接 按“右向绿色三角按钮”）
+
+
+4. 下载烧录： （方法2 -- 不推荐）
+
+    STM32CUBEIDE内部调用STM32CUBEPROGRAMMER工具链，下面的设置可用  （其中带 -s 0x8000000 ，烧录后马上运行）
+
+     C:\Program Files\STMicroelectronics\STM32Cube\STM32CubeProgrammer\bin\STM32_Programmer_CLI.exe
+
+     ${workspace_loc:/prj1/Release}
+
+     -c port=swd -w  prj1.elf #L
+     -c port=swd -w  prj1.hex  -s 0x8000000 #L
+
+
+5.  cubeide 编译时 问题
+
+分析：可能是中文名目录， 或目录名称太长
+问题：
+cannot open linker script file 
+D:\stm32_bootload_￡¤?????\￡¤?????01-flash￡¤??￡¤??-??????￡¤??-led-sensor-??????-ok\ommocom\STM32C011F6UX_FLASH.ld: 
+No such file or directory	
+答： 拷贝到 D:\test1\ommocom ， 即编译ok （说明短的英文名目录ok）
+答： 再拷贝到D:\test中\ommocom ， 又出现上面的编译错误   （说明短的中文名目录也err）
+
+
+6.  设置全局变量
+    。右键project\属性\c/c++ Build \ Settings \ MCU GCC Compiler\Preprocessor
+    。在列表中定义全局变量
+
+
+7.  打印printf的设置, float的设置   （待测试验证）
+    。右键project\属性\c/c++ Build \ Settings \ MCU settings
+    。勾选“use floar with printf ..."
+    。勾选  "use float with scanf ..."
+
+8.  选择不同的c库
+    。右键project\属性\c/c++ Build \ Settings \MCU GCC Compiler\General
+    。在Language standrd中选择c库类型，如: ISO C11
+
+
+
+补充1. STM32CUBE或不能按扇区擦除  -- 待验证
+
+
+
+
+
+==============rx2 到cubeide的修改点===============
+
+    1. 在mx中生成cube工程
+    2. 在it.c中的用户代码中定义ilen
+    3. 在include中， 添加core中的drivefile中的hfile
+    3. 在include中， 再添加core中的drivefile中的hfile\Legacy
+
+    4. 注释： 
+        SCB->VTOR = FLASH_BASE | 0x3000;
+
+
+
+
+
+
+
+
+
+
+
